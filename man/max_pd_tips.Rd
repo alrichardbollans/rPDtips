@@ -2,15 +2,17 @@
 % Please edit documentation in R/max_pd_tips.R
 \name{max_pd_tips}
 \alias{max_pd_tips}
-\title{Tips whose individual addition to `species` gives the largest increase in
+\title{Find tips whose individual addition to `species` gives the largest increase in
 unrooted PD, i.e. sum(keep.tip(tree, species)$edge.length).}
 \usage{
 max_pd_tips(tree, species, tol = 1e-08)
 }
 \arguments{
-\item{tree}{The phylogenetic tree to use}
+\item{tree}{The phylogenetic tree to use (must be rooted, bifurcating and ultrametric}
 
 \item{species}{The list of existing species to use}
+
+\item{tol}{a tolerance to allow for floating point issues}
 }
 \value{
 a data.frame(tip, gain). Zero rows if `species` is every tip.
@@ -19,12 +21,5 @@ a data.frame(tip, gain). Zero rows if `species` is every tip.
 Assumes a rooted, bifurcating, ultrametric tree.
 }
 \details{
-Let h(v) be the height of node v above the tips and m the MRCA of `species`.
- * m is not the root: the best tips are all tips in the root child clade that
-   contains no member of `species`. Gain = 2*h(root) - h(m).
- * m is the root: every covered node r with exactly one covered child offers
-   the uncovered child clade as candidates, with gain h(r). Keep the r with
-   the largest h(r).
-
 Returns a data.frame(tip, gain). Zero rows if `species` is every tip.
 }

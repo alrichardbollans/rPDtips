@@ -1,31 +1,21 @@
-library(ape)
-
-#' Tips whose individual addition to `species` gives the largest increase in
+#' Find tips whose individual addition to `species` gives the largest increase in
 #' unrooted PD, i.e. sum(keep.tip(tree, species)$edge.length).
 #'
 #' Assumes a rooted, bifurcating, ultrametric tree.
 #'
-#' Let h(v) be the height of node v above the tips and m the MRCA of `species`.
-#'  * m is not the root: the best tips are all tips in the root child clade that
-#'    contains no member of `species`. Gain = 2*h(root) - h(m).
-#'  * m is the root: every covered node r with exactly one covered child offers
-#'    the uncovered child clade as candidates, with gain h(r). Keep the r with
-#'    the largest h(r).
-#'
 #' Returns a data.frame(tip, gain). Zero rows if `species` is every tip.
 #'
-#' @param tree The phylogenetic tree to use
+#' @param tree The phylogenetic tree to use (must be rooted, bifurcating and ultrametric
 #' @param species The list of existing species to use
+#' @param tol a tolerance to allow for floating point issues
 #' @return a data.frame(tip, gain). Zero rows if `species` is every tip.
-
-
 max_pd_tips <- function(tree, species, tol = 1e-8) {
 
   # ---- 1. Validate inputs ---------------------------------------------------
   stopifnot(inherits(tree, "phylo"))
-  if (!is.rooted(tree))      stop("tree must be rooted")
-  if (!is.binary(tree))      stop("tree must be bifurcating")
-  if (!is.ultrametric(tree)) stop("tree must be ultrametric")
+  if (!ape::is.rooted(tree))      stop("tree must be rooted")
+  if (!ape::is.binary(tree))      stop("tree must be bifurcating")
+  if (!ape::is.ultrametric(tree)) stop("tree must be ultrametric")
 
   selected_tips   <- unique(as.character(species))
   n_selected      <- length(selected_tips)
@@ -36,7 +26,7 @@ max_pd_tips <- function(tree, species, tol = 1e-8) {
     stop("Tips not in tree: ", paste(labels_not_in_tree, collapse = ", "))
   }
 
-  n_tips <- Ntip(tree)
+  n_tips <- ape::Ntip(tree)
   if (n_selected == n_tips) {
     # Nothing left to add
     return(data.frame(tip = character(0), gain = numeric(0)))
@@ -46,7 +36,7 @@ max_pd_tips <- function(tree, species, tol = 1e-8) {
   # node.depth.edgelength() gives distance from the root; on an ultrametric
   # tree, (max distance - distance) is the height above the tips.
   # Nodes are numbered 1..n_tips (tips), then n_tips + 1 (the root) upwards.
-  distance_from_root <- node.depth.edgelength(tree)
+  distance_from_root <- ape::node.depth.edgelength(tree)
   node_height        <- max(distance_from_root) - distance_from_root
 
   # ---- 3. Tree structure ----------------------------------------------------
@@ -79,10 +69,8 @@ max_pd_tips <- function(tree, species, tol = 1e-8) {
   # Start at the root and keep stepping into the child that contains ALL
   # selected tips.
   if (length(species)==1){
-    tip_node <- which(tree$tip.label == species[1])
-
-    # 2. Get the parent node number using getParent
-    mrca_node = phytools::getParent(tree, tip_node)
+    tip_idx <- which(tree$tip.label == species[1])
+    mrca_node = phytools::getParent(tree, tip_idx)
   }else{
     mrca_node <- ape::getMRCA(tree, species)
   }
@@ -117,7 +105,7 @@ max_pd_tips <- function(tree, species, tol = 1e-8) {
 
   # ---- 7. Convert clades (node numbers) to tip labels --------------------------
   # clade_tip_indices[[i]] lists the tip numbers below internal node (n_tips + i).
-  clade_tip_indices <- prop.part(tree)
+  clade_tip_indices <- ape::prop.part(tree)
   best_tip_labels <- unlist(lapply(uncovered_clades, function(clade_node) {
     if (clade_node <= n_tips) {
       tree$tip.label[clade_node]                                   # the clade is a single tip
@@ -133,9 +121,10 @@ max_pd_tips <- function(tree, species, tol = 1e-8) {
 #' PD of a single tip is defined as 0.
 #' @param tree The phylogenetic tree to use
 #' @param species The list of existing species to use
+#' @param tol a tolerance to allow for floating point issues
 #' @return a data.frame(tip, gain).
 max_pd_tips_brute <- function(tree, species, tol = 1e-8) {
-  pd <- function(sp) sum(keep.tip(tree, sp)$edge.length)
+  pd <- function(sp) sum(ape::keep.tip(tree, sp)$edge.length)
   base <- pd(species)
   cand <- setdiff(tree$tip.label, species)
   if (length(cand) == 0) return(data.frame(tip = character(0), gain = numeric(0)))
@@ -154,6 +143,7 @@ max_pd_tips_brute <- function(tree, species, tol = 1e-8) {
 #' @param col_species colour for the original species
 #' @param col_new     colour for the PD-maximising additions
 #' @param col_other   colour for all remaining tips
+#' @param cex sizes of plot symbols
 #' @param legend_pos  position passed to legend(); NULL for no legend
 #' @param plot_length whether to include branch lengths on graphs
 #' @param ...      further arguments passed to ape's plot.phylo (e.g. type = "fan")
@@ -166,7 +156,7 @@ plot_max_pd_tips <- function(tree, species, result = NULL,
   species  <- unique(as.character(species))
   new_tips <- as.character(result$tip)
 
-  tip_col <- rep(col_other, Ntip(tree))
+  tip_col <- rep(col_other, ape::Ntip(tree))
   tip_col[tree$tip.label %in% species]  <- col_species
   tip_col[tree$tip.label %in% new_tips] <- col_new
 
@@ -175,7 +165,7 @@ plot_max_pd_tips <- function(tree, species, result = NULL,
 
 
   hl <- which(tip_col != col_other)
-  if (length(hl)) tiplabels(pch = 16, tip = hl, col = tip_col[hl], cex = cex * 1.5)
+  if (length(hl)) ape::tiplabels(pch = 16, tip = hl, col = tip_col[hl], cex = cex * 1.5)
 
   if (!is.null(legend_pos)) {
     legend(legend_pos, bty = "n", pch = 16, cex = 0.8,
@@ -184,7 +174,7 @@ plot_max_pd_tips <- function(tree, species, result = NULL,
   }
   invisible(tip_col)
   if (plot_length){
-    edgelabels(round(tree$edge.length,3),col="black",bg=NULL, font=1, offset =10)
+    ape::edgelabels(round(tree$edge.length,3),col="black",bg=NULL, font=1, offset =10, cex = cex * 0.7)
   }
 }
 

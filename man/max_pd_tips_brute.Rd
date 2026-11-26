@@ -11,6 +11,8 @@ max_pd_tips_brute(tree, species, tol = 1e-08)
 \item{tree}{The phylogenetic tree to use}
 
 \item{species}{The list of existing species to use}
+
+\item{tol}{a tolerance to allow for floating point issues}
 }
 \value{
 a data.frame(tip, gain).

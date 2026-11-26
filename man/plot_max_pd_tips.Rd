@@ -31,6 +31,8 @@ plot_max_pd_tips(
 
 \item{col_other}{colour for all remaining tips}
 
+\item{cex}{sizes of plot symbols}
+
 \item{legend_pos}{position passed to legend(); NULL for no legend}
 
 \item{plot_length}{whether to include branch lengths on graphs}

@@ -1,6 +1,6 @@
 Package: rPDtips
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Finding PD-maximising Tips of Phylogenetic Trees
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -9,9 +9,10 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: Finds PD-maximising tips in phylogenetic trees
+License: MIT License
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
+Imports:
+    ape,phytools

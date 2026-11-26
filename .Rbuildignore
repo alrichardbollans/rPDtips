@@ -1,2 +1,5 @@
-^.*\.Rproj$
+^\.idea$
 ^\.Rproj\.user$
+^.*\.Rproj$
+^\.git$
+^\.github$

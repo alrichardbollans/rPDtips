@@ -9,6 +9,7 @@
 #' @param species The list of existing species to use
 #' @param tol a tolerance to allow for floating point issues
 #' @return a data.frame(tip, gain). Zero rows if `species` is every tip.
+#' @export
 max_pd_tips <- function(tree, species, tol = 1e-8) {
 
   # ---- 1. Validate inputs ---------------------------------------------------
@@ -123,6 +124,7 @@ max_pd_tips <- function(tree, species, tol = 1e-8) {
 #' @param species The list of existing species to use
 #' @param tol a tolerance to allow for floating point issues
 #' @return a data.frame(tip, gain).
+#' @export
 max_pd_tips_brute <- function(tree, species, tol = 1e-8) {
   pd <- function(sp) sum(ape::keep.tip(tree, sp)$edge.length)
   base <- pd(species)
@@ -148,6 +150,7 @@ max_pd_tips_brute <- function(tree, species, tol = 1e-8) {
 #' @param plot_length whether to include branch lengths on graphs
 #' @param ...      further arguments passed to ape's plot.phylo (e.g. type = "fan")
 #' Returns the vector of tip colours invisibly.
+#' @export
 plot_max_pd_tips <- function(tree, species, result = NULL,
                              col_species = "blue", col_new = "red",
                              col_other = "grey60", cex = 0.7,
